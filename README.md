@@ -14,8 +14,6 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-v2.1-ff69b4.svg)](https://github.com/huggingface/lerobot/blob/main/CODE_OF_CONDUCT.md)
 [![Discord](https://dcbadge.vercel.app/api/server/C5P34WJ68S?style=flat)](https://discord.gg/s3KuuzsPFb)
 
-<!-- [![Coverage](https://codecov.io/gh/huggingface/lerobot/branch/main/graph/badge.svg?token=TODO)](https://codecov.io/gh/huggingface/lerobot) -->
-
 </div>
 
 <h2 align="center">
@@ -102,100 +100,196 @@
 
 LeRobot works with Python 3.10+ and PyTorch 2.2+.
 
-### Environment Setup
+This project uses [Pixi](https://pixi.sh/) for environment and dependency management.
+You do not need to manually install conda, pip, or ffmpeg — Pixi handles everything.
 
-Create a virtual environment with Python 3.10 and activate it, e.g. with [`miniconda`](https://docs.anaconda.com/free/miniconda/index.html):
-
-```bash
-conda create -y -n lerobot python=3.10
-conda activate lerobot
-```
-
-When using `miniconda`, install `ffmpeg` in your environment:
+### 1. Install Pixi
 
 ```bash
-conda install ffmpeg -c conda-forge
+curl -fsSL https://pixi.sh/install.sh | sh
 ```
 
-> **NOTE:** This usually installs `ffmpeg 7.X` for your platform compiled with the `libsvtav1` encoder. If `libsvtav1` is not supported (check supported encoders with `ffmpeg -encoders`), you can:
->
-> - _[On any platform]_ Explicitly install `ffmpeg 7.X` using:
->
-> ```bash
-> conda install ffmpeg=7.1.1 -c conda-forge
-> ```
->
-> - _[On Linux only]_ Install [ffmpeg build dependencies](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu#GettheDependencies) and [compile ffmpeg from source with libsvtav1](https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu#libsvtav1), and make sure you use the corresponding ffmpeg binary to your install with `which ffmpeg`.
-
-### Install LeRobot 🤗
-
-#### From Source
-
-First, clone the repository and navigate into the directory:
+### 2. Clone the repository
 
 ```bash
 git clone https://github.com/huggingface/lerobot.git
 cd lerobot
 ```
 
-Then, install the library in editable mode. This is useful if you plan to contribute to the code.
+### 3. Install dependencies
 
 ```bash
-pip install -e .
+pixi install
 ```
 
-> **NOTE:** If you encounter build errors, you may need to install additional dependencies (`cmake`, `build-essential`, and `ffmpeg libs`). On Linux, run:
-> `sudo apt-get install cmake build-essential python3-dev pkg-config libavformat-dev libavcodec-dev libavdevice-dev libavutil-dev libswscale-dev libswresample-dev libavfilter-dev`. For other systems, see: [Compiling PyAV](https://pyav.org/docs/develop/overview/installation.html#bring-your-own-ffmpeg)
+Pixi will automatically set up Python 3.10, ffmpeg, cmake, and all required Python packages.
 
-For simulations, 🤗 LeRobot comes with gymnasium environments that can be installed as extras:
-
-- [aloha](https://github.com/huggingface/gym-aloha)
-- [xarm](https://github.com/huggingface/gym-xarm)
-- [pusht](https://github.com/huggingface/gym-pusht)
-
-For instance, to install 🤗 LeRobot with aloha and pusht, use:
+### 4. Enter the environment
 
 ```bash
-pip install -e ".[aloha, pusht]"
+pixi shell
 ```
 
-### Installation from PyPI
+You are now inside the fully configured environment. No `conda activate` or `pip install` needed.
 
-**Core Library:**
-Install the base package with:
+---
+
+## Optional Environments
+
+For simulation environments or specific hardware support, install the relevant pixi environment:
 
 ```bash
-pip install lerobot
+pixi install -e aloha       # ALOHA simulation
+pixi install -e pusht       # PushT simulation
+pixi install -e xarm        # XArm simulation
+pixi install -e dynamixel   # Dynamixel motors
+pixi install -e feetech     # Feetech motors
+pixi install -e hopejr      # HopeJR humanoid robot
+pixi install -e lekiwi      # LeKiwi mobile robot
+pixi install -e gamepad     # Gamepad controller
+pixi install -e kinematics  # Kinematics support
+pixi install -e realsense   # Intel RealSense camera
+pixi install -e pi0         # Pi0 policy
+pixi install -e smolvla     # SmolVLA policy
+pixi install -e hilserl     # HiLSERL policy
+pixi install -e dev         # Development tools
+pixi install -e test        # Test dependencies
 ```
 
-_This installs only the default dependencies._
-
-**Extra Features:**
-To install additional functionality, use one of the following:
+Enter a specific environment shell:
 
 ```bash
-pip install 'lerobot[all]'          # All available features
-pip install 'lerobot[aloha,pusht]'  # Specific features (Aloha & Pusht)
-pip install 'lerobot[feetech]'      # Feetech motor support
+pixi shell -e aloha
 ```
 
-_Replace `[...]` with your desired features._
+---
 
-**Available Tags:**
-For a full list of optional dependencies, see:
-https://pypi.org/project/lerobot/
+## Usage
 
-### Weights & Biases
+All commands are run via `pixi run <task>`. You do not need to activate the environment first.
 
-To use [Weights and Biases](https://docs.wandb.ai/quickstart) for experiment tracking, log in with
+### Robot Tasks
+
+**Teleoperate a robot:**
+```bash
+pixi run teleoperate
+```
+
+**Record a dataset:**
+```bash
+pixi run record
+```
+
+**Replay a recorded dataset:**
+```bash
+pixi run replay
+```
+
+**Calibrate a robot:**
+```bash
+pixi run calibrate
+```
+
+**Setup motors:**
+```bash
+pixi run setup-motors
+```
+
+**Find available cameras:**
+```bash
+pixi run find-cameras
+```
+
+**Find available ports:**
+```bash
+pixi run find-port
+```
+
+### Training & Evaluation
+
+**Train a policy:**
+```bash
+pixi run train
+```
+
+To pass arguments:
+```bash
+pixi run train -- --config_path=lerobot/diffusion_pusht --wandb.enable=true
+```
+
+**Evaluate a pretrained policy:**
+```bash
+pixi run eval
+```
+
+To pass arguments:
+```bash
+pixi run eval -- \
+    --policy.path=lerobot/diffusion_pusht \
+    --env.type=pusht \
+    --eval.batch_size=10 \
+    --eval.n_episodes=10 \
+    --policy.device=cuda
+```
+
+Note: After training your own policy, you can re-evaluate checkpoints with:
+```bash
+pixi run eval -- --policy.path={OUTPUT_DIR}/checkpoints/last/pretrained_model
+```
+
+### Running in a Specific Environment
+
+To run any task inside a specific pixi environment, use `-e`:
+
+```bash
+pixi run -e aloha train
+pixi run -e pusht eval
+pixi run -e feetech teleoperate
+pixi run -e hopejr record
+pixi run -e lekiwi teleoperate
+```
+
+### Development Tasks
+
+**Run linter:**
+```bash
+pixi run lint
+```
+
+**Run formatter:**
+```bash
+pixi run format
+```
+
+**Run tests:**
+```bash
+pixi run test
+```
+
+**Run security scan:**
+```bash
+pixi run security
+```
+
+---
+
+## Weights & Biases
+
+To use [Weights and Biases](https://docs.wandb.ai/quickstart) for experiment tracking, log in with:
 
 ```bash
 wandb login
 ```
 
-(note: you will also need to enable WandB in the configuration. See below.)
+Then enable WandB when training by passing `--wandb.enable=true`:
 
-### Visualize datasets
+```bash
+pixi run train -- --wandb.enable=true
+```
+
+---
+
+## Visualize Datasets
 
 Check out [example 1](https://github.com/huggingface/lerobot/blob/main/examples/1_load_lerobot_dataset.py) that illustrates how to use our dataset class which automatically downloads data from the Hugging Face hub.
 
@@ -207,7 +301,7 @@ python -m lerobot.scripts.visualize_dataset \
     --episode-index 0
 ```
 
-or from a dataset in a local folder with the `root` option and the `--local-files-only` (in the following case the dataset will be searched for in `./my_local_data_dir/lerobot/pusht`)
+or from a dataset in a local folder with the `root` option and the `--local-files-only` flag:
 
 ```bash
 python -m lerobot.scripts.visualize_dataset \
@@ -217,21 +311,19 @@ python -m lerobot.scripts.visualize_dataset \
     --episode-index 0
 ```
 
-It will open `rerun.io` and display the camera streams, robot states and actions, like this:
-
-https://github-production-user-asset-6210df.s3.amazonaws.com/4681518/328035972-fd46b787-b532-47e2-bb6f-fd536a55a7ed.mov?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240505%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240505T172924Z&X-Amz-Expires=300&X-Amz-Signature=d680b26c532eeaf80740f08af3320d22ad0b8a4e4da1bcc4f33142c15b509eda&X-Amz-SignedHeaders=host&actor_id=24889239&key_id=0&repo_id=748713144
+It will open `rerun.io` and display the camera streams, robot states and actions.
 
 Our script can also visualize datasets stored on a distant server. See `python -m lerobot.scripts.visualize_dataset --help` for more instructions.
 
-### The `LeRobotDataset` format
+---
+
+## The `LeRobotDataset` Format
 
 A dataset in `LeRobotDataset` format is very simple to use. It can be loaded from a repository on the Hugging Face hub or a local folder simply with e.g. `dataset = LeRobotDataset("lerobot/aloha_static_coffee")` and can be indexed into like any Hugging Face and PyTorch dataset. For instance `dataset[0]` will retrieve a single temporal frame from the dataset containing observation(s) and an action as PyTorch tensors ready to be fed to a model.
 
 A specificity of `LeRobotDataset` is that, rather than retrieving a single frame by its index, we can retrieve several frames based on their temporal relationship with the indexed frame, by setting `delta_timestamps` to a list of relative times with respect to the indexed frame. For example, with `delta_timestamps = {"observation.image": [-1, -0.5, -0.2, 0]}` one can retrieve, for a given index, 4 frames: 3 "previous" frames 1 second, 0.5 seconds, and 0.2 seconds before the indexed frame, and the indexed frame itself (corresponding to the 0 entry). See example [1_load_lerobot_dataset.py](https://github.com/huggingface/lerobot/blob/main/examples/1_load_lerobot_dataset.py) for more details on `delta_timestamps`.
 
-Under the hood, the `LeRobotDataset` format makes use of several ways to serialize data which can be useful to understand if you plan to work more closely with this format. We tried to make a flexible yet simple dataset format that would cover most type of features and specificities present in reinforcement learning and robotics, in simulation and in real-world, with a focus on cameras and robot states but easily extended to other types of sensory inputs as long as they can be represented by a tensor.
-
-Here are the important details and internal structure organization of a typical `LeRobotDataset` instantiated with `dataset = LeRobotDataset("lerobot/aloha_static_coffee")`. The exact features will change from dataset to dataset but not the main aspects:
+Here are the important details and internal structure of a typical `LeRobotDataset`:
 
 ```
 dataset attributes:
@@ -263,64 +355,31 @@ dataset attributes:
 
 A `LeRobotDataset` is serialised using several widespread file formats for each of its parts, namely:
 
-- hf_dataset stored using Hugging Face datasets library serialization to parquet
+- `hf_dataset` stored using Hugging Face datasets library serialization to parquet
 - videos are stored in mp4 format to save space
 - metadata are stored in plain json/jsonl files
 
 Dataset can be uploaded/downloaded from the HuggingFace hub seamlessly. To work on a local dataset, you can specify its location with the `root` argument if it's not in the default `~/.cache/huggingface/lerobot` location.
 
-### Evaluate a pretrained policy
+---
 
-Check out [example 2](https://github.com/huggingface/lerobot/blob/main/examples/2_evaluate_pretrained_policy.py) that illustrates how to download a pretrained policy from Hugging Face hub, and run an evaluation on its corresponding environment.
+## Reproduce State-of-the-Art (SOTA)
 
-We also provide a more capable script to parallelize the evaluation over multiple environments during the same rollout. Here is an example with a pretrained model hosted on [lerobot/diffusion_pusht](https://huggingface.co/lerobot/diffusion_pusht):
-
-```bash
-python -m lerobot.scripts.eval \
-    --policy.path=lerobot/diffusion_pusht \
-    --env.type=pusht \
-    --eval.batch_size=10 \
-    --eval.n_episodes=10 \
-    --policy.use_amp=false \
-    --policy.device=cuda
-```
-
-Note: After training your own policy, you can re-evaluate the checkpoints with:
+We provide some pretrained policies on our [hub page](https://huggingface.co/lerobot) that can achieve state-of-the-art performances. You can reproduce their training by loading the config from their run:
 
 ```bash
-python -m lerobot.scripts.eval --policy.path={OUTPUT_DIR}/checkpoints/last/pretrained_model
-```
-
-See `python -m lerobot.scripts.eval --help` for more instructions.
-
-### Train your own policy
-
-Check out [example 3](https://github.com/huggingface/lerobot/blob/main/examples/3_train_policy.py) that illustrates how to train a model using our core library in python, and [example 4](https://github.com/huggingface/lerobot/blob/main/examples/4_train_policy_with_script.md) that shows how to use our training script from command line.
-
-To use wandb for logging training and evaluation curves, make sure you've run `wandb login` as a one-time setup step. Then, when running the training command above, enable WandB in the configuration by adding `--wandb.enable=true`.
-
-A link to the wandb logs for the run will also show up in yellow in your terminal. Here is an example of what they look like in your browser. Please also check [here](https://github.com/huggingface/lerobot/blob/main/examples/4_train_policy_with_script.md#typical-logs-and-metrics) for the explanation of some commonly used metrics in logs.
-
-\<img src="https://raw.githubusercontent.com/huggingface/lerobot/main/media/wandb.png" alt="WandB logs example"\>
-
-Note: For efficiency, during training every checkpoint is evaluated on a low number of episodes. You may use `--eval.n_episodes=500` to evaluate on more episodes than the default. Or, after training, you may want to re-evaluate your best checkpoints on more episodes or change the evaluation settings. See `python -m lerobot.scripts.eval --help` for more instructions.
-
-#### Reproduce state-of-the-art (SOTA)
-
-We provide some pretrained policies on our [hub page](https://huggingface.co/lerobot) that can achieve state-of-the-art performances.
-You can reproduce their training by loading the config from their run. Simply running:
-
-```bash
-python -m lerobot.scripts.train --config_path=lerobot/diffusion_pusht
+pixi run train -- --config_path=lerobot/diffusion_pusht
 ```
 
 reproduces SOTA results for Diffusion Policy on the PushT task.
+
+---
 
 ## Contribute
 
 If you would like to contribute to 🤗 LeRobot, please check out our [contribution guide](https://github.com/huggingface/lerobot/blob/main/CONTRIBUTING.md).
 
-### Add a pretrained policy
+### Add a Pretrained Policy
 
 Once you have trained a policy you may upload it to the Hugging Face hub using a hub id that looks like `${hf_user}/${repo_name}` (e.g. [lerobot/diffusion_pusht](https://huggingface.co/lerobot/diffusion_pusht)).
 
@@ -338,7 +397,9 @@ huggingface-cli upload ${hf_user}/${repo_name} path/to/pretrained_model
 
 See [eval.py](https://github.com/huggingface/lerobot/blob/main/src/lerobot/scripts/eval.py) for an example of how other people may use your policy.
 
-### Acknowledgment
+---
+
+## Acknowledgment
 
 - The LeRobot team 🤗 for building SmolVLA [Paper](https://arxiv.org/abs/2506.01844), [Blog](https://huggingface.co/blog/smolvla).
 - Thanks to Tony Zhao, Zipeng Fu and colleagues for open sourcing ACT policy, ALOHA environments and datasets. Ours are adapted from [ALOHA](https://tonyzhaozh.github.io/aloha) and [Mobile ALOHA](https://mobile-aloha.github.io).
@@ -346,6 +407,8 @@ See [eval.py](https://github.com/huggingface/lerobot/blob/main/src/lerobot/scrip
 - Thanks to Nicklas Hansen, Yunhai Feng and colleagues for open sourcing TDMPC policy, Simxarm environments and datasets. Ours are adapted from [TDMPC](https://github.com/nicklashansen/tdmpc) and [FOWM](https://www.yunhaifeng.com/FOWM).
 - Thanks to Antonio Loquercio and Ashish Kumar for their early support.
 - Thanks to [Seungjae (Jay) Lee](https://sjlee.cc/), [Mahi Shafiullah](https://mahis.life/) and colleagues for open sourcing [VQ-BeT](https://sjlee.cc/vq-bet/) policy and helping us adapt the codebase to our repository. The policy is adapted from [VQ-BeT repo](https://github.com/jayLEE0301/vq_bet_official).
+
+---
 
 ## Citation
 
