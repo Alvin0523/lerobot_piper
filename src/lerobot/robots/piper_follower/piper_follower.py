@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 from lerobot.cameras import Camera
+from lerobot.cameras.realsense.camera_realsense import RealSenseCamera
 from lerobot.cameras.utils import make_cameras_from_configs
 from lerobot.constants import HF_LEROBOT_CALIBRATION, ROBOTS
 from lerobot.errors import DeviceNotConnectedError
@@ -152,6 +153,13 @@ class PiperFollower(Robot):
             obs_dict[cam_key] = cam.async_read()
             dt_ms = (time.perf_counter() - start) * 1e3
             logger.debug(f"{self} read {cam_key}: {dt_ms:.1f}ms")
+
+            # Also capture depth frame if this is a RealSense camera with depth enabled
+            if isinstance(cam, RealSenseCamera) and cam.use_depth:
+                start = time.perf_counter()
+                obs_dict[f"{cam_key}.depth"] = cam.read_depth()
+                dt_ms = (time.perf_counter() - start) * 1e3
+                logger.debug(f"{self} read {cam_key}.depth: {dt_ms:.1f}ms")
 
         return obs_dict
 
