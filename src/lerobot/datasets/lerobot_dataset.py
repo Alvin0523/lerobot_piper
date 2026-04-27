@@ -88,11 +88,18 @@ class LeRobotDatasetMetadata:
         self.revision = revision if revision else CODEBASE_VERSION
         self.root = Path(root) if root is not None else HF_LEROBOT_HOME / repo_id
 
+        self._local_only = root is not None
+
         try:
             if force_cache_sync:
                 raise FileNotFoundError
             self.load_metadata()
         except (FileNotFoundError, NotADirectoryError):
+            if self._local_only:
+                raise FileNotFoundError(
+                    f"Local dataset metadata not found at '{self.root}/meta/'. "
+                    f"Make sure '--dataset.root' points to a valid dataset directory."
+                )
             if is_valid_version(self.revision):
                 self.revision = get_safe_version(self.repo_id, self.revision)
 
@@ -473,12 +480,18 @@ class LeRobotDataset(torch.utils.data.Dataset):
             self.stats = aggregate_stats(episodes_stats)
 
         # Load actual data
+        _local_only = root is not None
         try:
             if force_cache_sync:
                 raise FileNotFoundError
             assert all((self.root / fpath).is_file() for fpath in self.get_episodes_file_paths())
             self.hf_dataset = self.load_hf_dataset()
         except (AssertionError, FileNotFoundError, NotADirectoryError):
+            if _local_only:
+                raise FileNotFoundError(
+                    f"Local dataset parquet files not found under '{self.root}'. "
+                    f"Make sure '--dataset.root' points to a valid dataset directory."
+                )
             self.revision = get_safe_version(self.repo_id, self.revision)
             self.download_episodes(download_videos)
             self.hf_dataset = self.load_hf_dataset()

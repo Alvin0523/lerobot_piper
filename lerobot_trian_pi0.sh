@@ -9,7 +9,7 @@ python -m lerobot.scripts.train \
   --policy.device=cuda \
   --policy.push_to_hub=false \
   --dataset.repo_id=comp4901/test3 \
-  --dataset.root=/home/orin/comp4901/test3 \
+  --dataset.root=/home/orin/vlash_piper/data/test3 \
   --dataset.video_backend=pyav \
   --dataset.use_imagenet_stats=false \
   --output_dir=outputs/train/pi0_piper_test3 \

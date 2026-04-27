@@ -50,6 +50,11 @@ EPISODES_PATH = "meta/episodes.jsonl"
 STATS_PATH = "meta/stats.json"
 EPISODES_STATS_PATH = "meta/episodes_stats.jsonl"
 TASKS_PATH = "meta/tasks.jsonl"
+LEGACY_TASKS_PATH = "meta/tasks.jsonl"  # v2.1 format
+DEFAULT_TASKS_PATH = "meta/tasks.parquet"  # v3.0 format
+
+LEGACY_EPISODES_PATH = "meta/episodes.jsonl"  # v2.1 format
+EPISODES_DIR = "meta/episodes"  # v3.0 format
 
 DEFAULT_VIDEO_PATH = "videos/chunk-{episode_chunk:03d}/{video_key}/episode_{episode_index:06d}.mp4"
 DEFAULT_PARQUET_PATH = "data/chunk-{episode_chunk:03d}/episode_{episode_index:06d}.parquet"
@@ -219,6 +224,19 @@ def write_episode(episode: dict, local_dir: Path):
 def load_episodes(local_dir: Path) -> dict:
     episodes = load_jsonlines(local_dir / EPISODES_PATH)
     return {item["episode_index"]: item for item in sorted(episodes, key=lambda x: x["episode_index"])}
+
+
+def load_nested_dataset(directory: Path):
+    """Load a nested parquet dataset directory (v3.0 format).
+    
+    Args:
+        directory: Path to directory containing parquet files
+        
+    Returns:
+        HuggingFace Dataset
+    """
+    import datasets
+    return datasets.load_from_disk(str(directory))
 
 
 def write_episode_stats(episode_index: int, episode_stats: dict, local_dir: Path):
