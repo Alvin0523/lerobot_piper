@@ -22,10 +22,13 @@ import rerun as rr
 
 def _init_rerun(session_name: str = "lerobot_control_loop") -> None:
     """Initializes the Rerun SDK for visualizing the control loop."""
-    batch_size = os.getenv("RERUN_FLUSH_NUM_BYTES", "5000000")  # default 500KB, balances flush frequency and performance
+    # Large flush threshold: reduces how often Python blocks waiting for gRPC proxy.
+    # Small values (e.g. 5MB) cause frequent flushes that can freeze the control loop
+    # when the gRPC proxy hits its 1 GiB memory limit and stalls.
+    batch_size = os.getenv("RERUN_FLUSH_NUM_BYTES", "100000000")  # 100 MB
     os.environ["RERUN_FLUSH_NUM_BYTES"] = batch_size
     rr.init(session_name)
-    memory_limit = os.getenv("LEROBOT_RERUN_MEMORY_LIMIT", "10%")
+    memory_limit = os.getenv("LEROBOT_RERUN_MEMORY_LIMIT", "50%")
     rr.spawn(memory_limit=memory_limit)
 
 
